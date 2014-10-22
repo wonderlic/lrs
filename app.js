@@ -1,4 +1,4 @@
-﻿var
+var
     koa = require('koa'),
     logger = require('koa-logger'),
     route = require('koa-route'),
@@ -31,4 +31,4 @@ app.use(route.put('/statements', function *(next){
 }));
 
 
-app.listen(3000);
+app.listen(process.env.PORT, process.env.IP);
