@@ -15,6 +15,16 @@ var app = koa();
 app.use(logger());
 
 
+app.use(route.get('/xAPI/about', function*() {
+    this.body = {
+        version: '1.0.2'
+    };
+}));
+
+
+
+
+
 app.use(function*(next) {
     var header = 'X-Experience-API-Version';
     
@@ -29,11 +39,6 @@ app.use(function*(next) {
     this.set(header, VERSION);
 });
 
-app.use(route.get('/xAPI/about', function*() {
-    this.body = {
-        version: '1.0.2'
-    };
-}));
 
 app.use(route.get('/xAPI/statements', function*() {
     this.body = statements.get();
