@@ -3,12 +3,8 @@ var
     logger = require('koa-logger'),
     route = require('koa-route'),
     parse = require('co-body'),
-
-    statements = require('./api/statements'),
-
-
+    mongo = require('koa-mongo'),
     VERSION = '1.0.2';
-
 
 var app = koa();
 
@@ -22,12 +18,9 @@ app.use(route.get('/xAPI/about', function*() {
 }));
 
 
-
-
-
 app.use(function*(next) {
     var header = 'X-Experience-API-Version';
-    
+
     if (this.get(header) && this.get(header).substring(0, 3) === VERSION.substring(0, 3)) {
         yield next;
     }
@@ -40,19 +33,27 @@ app.use(function*(next) {
 });
 
 
+app.use(mongo({
+    host: process.env.IP,
+    log: true
+}));
+
 app.use(route.get('/xAPI/statements', function*() {
-    this.body = statements.get();
+    var context = this;
+    this.mongo.db('lrs').collection('statements').find({}).toArray(function(err, doc) {
+        context.body = doc;
+    });
 }));
 
 
 app.use(route.put('/xAPI/statements', function*(next) {
-    if ('PUT' != this.method) {
-        return yield next;
-    }
-
-    statements.add(yield parse(this))
-
-    this.status = 204;
+    var context = this;
+    this.mongo.db('lrs').collection('statements').insert(yield parse(this), function(err, doc) {
+            if (!err){
+                    context.status = 204;
+            }
+        }
+    );
 }));
 
 

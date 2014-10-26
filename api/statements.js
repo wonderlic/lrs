@@ -1,14 +1,18 @@
 'use strict';
 
-var statements = [];
-
-function add(statement) {
-    statements.push(statement);
+module.exports = function(dbCollection)
+{
+    var add = function (statement) {
+         dbCollection.insert(statement);
+    };
+    
+    var get = function (callback) {
+        dbCollection.findOne({}, callback);
+    };
+    
+    return {
+        add: add,
+        get: get
+    };
 }
 
-function get() {
-    return statements;
-}
-
-module.exports.add = add;
-module.exports.get = get;
