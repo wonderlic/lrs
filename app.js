@@ -2,12 +2,18 @@ var
     koa = require('koa'),
     logger = require('koa-logger'),
     route = require('koa-route'),
+    cors = require('koa-cors'),
     parse = require('co-body'),
     mongo = require('koa-mongo'),
+
+
+    statements = require('./api/statements'),
+
     VERSION = '1.0.2';
 
 var app = koa();
 
+app.use(cors());
 app.use(logger());
 
 
@@ -16,7 +22,6 @@ app.use(route.get('/xAPI/about', function*() {
         version: '1.0.2'
     };
 }));
-
 
 app.use(function*(next) {
     var header = 'X-Experience-API-Version';
@@ -32,28 +37,30 @@ app.use(function*(next) {
     this.set(header, VERSION);
 });
 
-
-app.use(mongo({
-    host: process.env.IP,
-    log: true
-}));
-
 app.use(route.get('/xAPI/statements', function*() {
-    var context = this;
-    this.mongo.db('lrs').collection('statements').find({}).toArray(function(err, doc) {
-        context.body = doc;
+    var that = this;
+    yield statements.get().then(function(statements) {
+        if (statements) {
+            that.body = statements;
+        }
     });
 }));
 
 
 app.use(route.put('/xAPI/statements', function*(next) {
-    var context = this;
-    this.mongo.db('lrs').collection('statements').insert(yield parse(this), function(err, doc) {
-            if (!err){
-                    context.status = 204;
-            }
-        }
-    );
+    var that = this;
+    yield statements.add(
+        yield parse(that)).then(function() {
+        that.status = 204;
+    });
+}));
+
+app.use(route.post('/xAPI/statements', function*(next) {
+    var that = this;
+    yield statements.add(
+        yield parse(that)).then(function() {
+        that.status = 204;
+    });
 }));
 
 
