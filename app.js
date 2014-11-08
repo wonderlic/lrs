@@ -3,9 +3,9 @@ var
     logger = require('koa-logger'),
     route = require('koa-route'),
     cors = require('koa-cors'),
+    compress = require('koa-compress'),
     parse = require('co-body'),
     mongo = require('koa-mongo'),
-
 
     statements = require('./api/statements'),
 
@@ -13,6 +13,7 @@ var
 
 var app = koa();
 
+app.use(compress());
 app.use(cors());
 app.use(logger());
 
@@ -38,12 +39,45 @@ app.use(function*(next) {
 });
 
 app.use(route.get('/xAPI/statements', function*() {
-    var that = this;
-    yield statements.get().then(function(statements) {
-        if (statements) {
-            that.body = statements;
+    var query = this.request.query || {};
+
+    if (query.statementId) {
+        if (Object.keys(query).length !== 1) {
+            this.status = 400;
+            this.body = 'You can not supply other params along with statementId';
+            return;
         }
-    });
+        else {
+            var that = this;
+            yield statements.get({
+                id: query.statementId
+            }).then(function(statements) {
+                if (statements && statements.length) {
+                    that.status = 200;
+                    that.body = statements[0];
+                }
+            });
+        }
+    }
+    else {
+        var criteria = {};
+
+        if (query.verb) {
+            criteria['verb.id'] = query.verb;
+        }
+
+        if (query.activity) {
+            criteria['object.id'] = activity.verb;
+        }
+
+        var that = this;
+        yield statements.get(criteria).then(function(statements) {
+            if (statements) {
+                that.status = 200;
+                that.body = statements;
+            }
+        });
+    }
 }));
 
 
@@ -62,6 +96,7 @@ app.use(route.post('/xAPI/statements', function*(next) {
         that.status = 204;
     });
 }));
+
 
 
 app.listen(process.env.PORT, process.env.IP);

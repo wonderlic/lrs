@@ -16,8 +16,8 @@ function get(query) {
 
     MongoClient.connect(url, function(err, db) {
         var collection = db.collection('statements');
-
-        collection.find({}).toArray(function(err, doc) {
+        
+        collection.find(query).toArray(function(err, doc) {
             if (err) {
                 deferred.reject(err);
             }
