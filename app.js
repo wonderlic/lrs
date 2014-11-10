@@ -5,10 +5,7 @@ var
     cors = require('koa-cors'),
     compress = require('koa-compress'),
     parse = require('co-body'),
-    mongo = require('koa-mongo'),
-
-    statements = require('./api/statements'),
-
+    db = require("./db/db"),
     VERSION = '1.0.2';
 
 var app = koa();
@@ -48,15 +45,11 @@ app.use(route.get('/xAPI/statements', function*() {
             return;
         }
         else {
-            var that = this;
-            yield statements.get({
-                id: query.statementId
-            }).then(function(statements) {
-                if (statements && statements.length) {
-                    that.status = 200;
-                    that.body = statements[0];
-                }
-            });
+            var statement = yield db.statements.findOne({ id: query.statementId });
+            if (statement) {
+                this.status = 200;
+                this.body = statement;
+            }
         }
     }
     else {
@@ -67,36 +60,30 @@ app.use(route.get('/xAPI/statements', function*() {
         }
 
         if (query.activity) {
-            criteria['object.id'] = activity.verb;
+            criteria['object.id'] = query.activity;
         }
-
-        var that = this;
-        yield statements.get(criteria).then(function(statements) {
-            if (statements) {
-                that.status = 200;
-                that.body = statements;
-            }
-        });
+        
+        if (query.registration) {
+            criteria['context.registration'] = query.registration;
+        }
+        
+        var statements = yield db.statements.find(criteria);
+        if (statements) {
+            this.status = 200;
+            this.body = statements;
+        }
     }
 }));
 
 
 app.use(route.put('/xAPI/statements', function*(next) {
-    var that = this;
-    yield statements.add(
-        yield parse(that)).then(function() {
-        that.status = 204;
-    });
+    yield db.statements.insert(yield parse(this));
+    this.status = 204;
 }));
 
 app.use(route.post('/xAPI/statements', function*(next) {
-    var that = this;
-    yield statements.add(
-        yield parse(that)).then(function() {
-        that.status = 204;
-    });
+    yield db.statements.insert(yield parse(this));
+    this.status = 204;
 }));
-
-
 
 app.listen(process.env.PORT, process.env.IP);
