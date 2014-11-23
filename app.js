@@ -1,3 +1,5 @@
+'use strict'
+
 var
     koa = require('koa'),
     logger = require('koa-logger'),
@@ -6,6 +8,7 @@ var
     compress = require('koa-compress'),
     parse = require('co-body'),
     db = require("./db/db"),
+
     VERSION = '1.0.2';
 
 var app = koa();
@@ -28,6 +31,7 @@ app.use(route.get('/xAPI/about', function*() {
     this.body = {
         version: '1.0.2'
     };
+    this.status = 200;
 }));
 
 app.use(function*(next) {
@@ -37,31 +41,36 @@ app.use(function*(next) {
         yield next;
     }
     else {
-        this.status = 400;
         this.body = 'Invalid \'X-Experience-API-Version\' header was supplied';
+        this.status = 400;
     }
 
     this.set(header, VERSION);
 });
 
 app.use(route.get('/xAPI/statements', function*() {
-    var query = this.request.query || {};
+    var
+        criteria = {},
+        query = this.request.query || {};
 
     if (query.statementId) {
         if (Object.keys(query).length !== 1) {
-            this.status = 400;
             this.body = 'You can not supply other params along with statementId';
-            return;
+            this.status = 400;
         }
         else {
-            var statement = yield db.statements.findOne({ id: query.statementId });
+            var statement =
+                yield db.statements.findOne({
+                    id: query.statementId
+                });
             if (statement) {
-                this.status = 200;
                 this.body = statement;
+                this.status = 200;
             }
         }
     }
     else {
+
         var criteria = {};
 
         for (var prop in query) {
@@ -89,7 +98,6 @@ app.use(route.get('/xAPI/statements', function*() {
         }
     }
 }));
-
 
 app.use(route.put('/xAPI/statements', function*(next) {
     yield db.statements.insert(yield parse(this));
