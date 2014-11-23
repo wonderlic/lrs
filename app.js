@@ -11,7 +11,16 @@ var
 var app = koa();
 
 app.use(compress());
-app.use(cors());
+app.use(cors({
+    origin: function(req) {
+                return req.header.origin || '*';
+              },
+    methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
+    headers: 'x-experience-api-version,accept,authorization,content-type,If-Match,If-None-Match',
+    expose: 'X-Experience-API-Version,ETag,Last-Modified,Cache-Control,Content-Type,Content-Length,WWW-Authenticate',
+    credentials: true
+    }
+));
 app.use(logger());
 
 
@@ -55,22 +64,28 @@ app.use(route.get('/xAPI/statements', function*() {
     else {
         var criteria = {};
 
-        if (query.verb) {
-            criteria['verb.id'] = query.verb;
+        for (var prop in query) {
+            if (prop === 'verb') {
+                criteria['verb.id'] = query.verb;
+            }
+
+            if (prop === 'activity') {
+                criteria['object.id'] = query.activity;
+            }
+
+            if (prop === 'registration') {
+                criteria['context.registration'] = query.registration;
+            }
+
+            if (prop.indexOf('context.extensions.') === 0) {
+                criteria[prop] = query[prop];
+            }
         }
 
-        if (query.activity) {
-            criteria['object.id'] = query.activity;
-        }
-        
-        if (query.registration) {
-            criteria['context.registration'] = query.registration;
-        }
-        
         var statements = yield db.statements.find(criteria);
         if (statements) {
             this.status = 200;
-            this.body = statements;
+            this.body = { statements: statements };
         }
     }
 }));
@@ -78,12 +93,14 @@ app.use(route.get('/xAPI/statements', function*() {
 
 app.use(route.put('/xAPI/statements', function*(next) {
     yield db.statements.insert(yield parse(this));
-    this.status = 204;
+    this.body = "OK";
+    this.status = 200;
 }));
 
 app.use(route.post('/xAPI/statements', function*(next) {
     yield db.statements.insert(yield parse(this));
-    this.status = 204;
+    this.body = "OK";
+    this.status = 200;
 }));
 
 app.listen(process.env.PORT, process.env.IP);
