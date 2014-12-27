@@ -13,8 +13,11 @@ var
 
 var app = koa();
 
-app.use(compress())
-app.use(cors());
+app.use(compress());
+app.use(cors({
+    headers: 'x-experience-api-version,accept,authorization,content-type,If-Match,If-None-Match',
+    }
+));
 app.use(logger());
 
 
@@ -61,32 +64,38 @@ app.use(route.get('/xAPI/statements', function*() {
         }
     }
     else {
-        if (query.verb) {
-            criteria['verb.id'] = query.verb;
+
+        var criteria = {};
+
+        for (var prop in query) {
+            if (prop === 'verb') {
+                criteria['verb.id'] = query.verb;
+            }
+
+            if (prop === 'activity') {
+                criteria['object.id'] = query.activity;
+            }
+
+            if (prop === 'registration') {
+                criteria['context.registration'] = query.registration;
+            }
+
+            if (prop.indexOf('context.extensions.') === 0) {
+                criteria[prop] = query[prop];
+            }
         }
-
-        if (query.activity) {
-            criteria['object.id'] = query.activity;
-        }
-
-        if (query.registration) {
-            criteria['context.registration'] = query.registration;
-        }
-
-        var statements =
-            yield db.statements.find(criteria);
-
+        
+        var statements = yield db.statements.find(criteria, {limit: 500, fields : { _id: 0 }});
         if (statements) {
-            this.body = statements;
             this.status = 200;
+            this.body = { statements: statements };
         }
     }
 }));
 
-app.use(route.post('/xAPI/statements', function*() {
-    yield db.statements.insert(
-        yield parse(this));
-    this.status = 204;
+app.use(route.post('/xAPI/statements', function*(next) {
+    yield db.statements.insert(yield parse(this));
+    this.status = 200;
 }));
 
 app.listen(process.env.PORT, process.env.IP);
