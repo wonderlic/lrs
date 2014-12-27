@@ -15,13 +15,7 @@ var app = koa();
 
 app.use(compress());
 app.use(cors({
-    origin: function(req) {
-                return req.header.origin || '*';
-              },
-    methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
     headers: 'x-experience-api-version,accept,authorization,content-type,If-Match,If-None-Match',
-    expose: 'X-Experience-API-Version,ETag,Last-Modified,Cache-Control,Content-Type,Content-Length,WWW-Authenticate',
-    credentials: true
     }
 ));
 app.use(logger());
@@ -90,8 +84,8 @@ app.use(route.get('/xAPI/statements', function*() {
                 criteria[prop] = query[prop];
             }
         }
-
-        var statements = yield db.statements.find(criteria);
+        
+        var statements = yield db.statements.find(criteria, {limit: 500, fields : { _id: 0 }});
         if (statements) {
             this.status = 200;
             this.body = { statements: statements };
@@ -99,15 +93,8 @@ app.use(route.get('/xAPI/statements', function*() {
     }
 }));
 
-app.use(route.put('/xAPI/statements', function*(next) {
-    yield db.statements.insert(yield parse(this));
-    this.body = "OK";
-    this.status = 200;
-}));
-
 app.use(route.post('/xAPI/statements', function*(next) {
     yield db.statements.insert(yield parse(this));
-    this.body = "OK";
     this.status = 200;
 }));
 
