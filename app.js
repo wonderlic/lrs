@@ -93,6 +93,16 @@ app.use(route.get('/xAPI/statements', function*() {
             if (prop.indexOf('context.extensions.') === 0) {
                 criteria[prop] = query[prop];
             }
+
+            if (prop === 'agent') {
+                if (query.agent && query.agent.objectType === 'Agent') {
+                  var actorMailToIRI = query.agent.mbox;
+                  if (actorMailToIRI.indexOf('mailto:') !== 0) {
+                    actorMailToIRI = 'mailto:' + actorMailToIRI;
+                  }
+                  criteria['actor.mbox'] = actorMailToIRI;
+                }
+            }
         }
 
         var statements = yield db.statements.find(criteria, {limit: specifiedLimit, fields : { _id: 0 }});
