@@ -19,11 +19,13 @@
     db.createCollection("statements");  
     ```
 
-3. Create index for courseId field:
+3. Create indexes for most frequently used filter properties:
     
     ```
     use lrs
     db.statements.ensureIndex({ "context.extensions.http://easygenerator/expapi/course/id" : 1});  
+    db.statements.ensureIndex({ "verb.id" : 1});
+    db.statements.ensureIndex({ "actor.mbox" : 1});
     ```
 
 ### Installing website
