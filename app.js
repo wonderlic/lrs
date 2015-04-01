@@ -79,7 +79,12 @@ app.use(route.get('/xAPI/statements', function*() {
             }
 
             if (prop === 'verb') {
-                criteria['verb.id'] = query.verb;
+                var verbs = query.verb.split(',')
+                if (verbs.length === 1) {
+                    criteria['verb.id'] = verbs[0];
+                } else if (verbs.length > 1) {
+                    criteria['verb.id'] = { $in: verbs };
+                }
             }
 
             if (prop === 'activity') {
@@ -95,7 +100,8 @@ app.use(route.get('/xAPI/statements', function*() {
             }
 
             if (prop === 'agent') {
-                if (query.agent && query.agent.objectType === 'Agent') {
+                query.agent = JSON.parse(query.agent);
+                if (query.agent.objectType === 'Agent') {
                   var actorMailToIRI = query.agent.mbox;
                   if (actorMailToIRI.indexOf('mailto:') !== 0) {
                     actorMailToIRI = 'mailto:' + actorMailToIRI;
