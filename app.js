@@ -66,8 +66,18 @@ app.use(route.get('/xAPI/statements', function*() {
     else {
 
         var criteria = {};
+        var defaultLimit = 2000;
+        var specifiedLimit;
 
         for (var prop in query) {
+
+            if (prop === 'limit') {
+                specifiedLimit = parseInt(query.limit, 10);
+                if (isNaN(specifiedLimit) || specifiedLimit < 1) {
+                  specifiedLimit = defaultLimit;
+                }
+            }
+
             if (prop === 'verb') {
                 criteria['verb.id'] = query.verb;
             }
@@ -84,8 +94,8 @@ app.use(route.get('/xAPI/statements', function*() {
                 criteria[prop] = query[prop];
             }
         }
-        
-        var statements = yield db.statements.find(criteria, {limit: 500, fields : { _id: 0 }});
+
+        var statements = yield db.statements.find(criteria, {limit: specifiedLimit, fields : { _id: 0 }});
         if (statements) {
             this.status = 200;
             this.body = { statements: statements };
