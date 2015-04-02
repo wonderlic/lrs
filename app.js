@@ -68,6 +68,8 @@ app.use(route.get('/xAPI/statements', function*() {
         var criteria = {};
         var defaultLimit = 2000;
         var specifiedLimit;
+        var defaultSkip = 0;
+        var specifiedSkip;
 
         for (var prop in query) {
 
@@ -78,6 +80,13 @@ app.use(route.get('/xAPI/statements', function*() {
                 }
             }
 
+            if (prop === 'skip') {
+                specifiedSkip = parseInt(query.skip, 10);
+                if (isNaN(specifiedSkip) || specifiedLimit < 0) {
+                  specifiedSkip = defaultSkip;
+                }
+            }
+            
             if (prop === 'verb') {
                 var verbs = query.verb.split(',')
                 if (verbs.length === 1) {
@@ -111,7 +120,7 @@ app.use(route.get('/xAPI/statements', function*() {
             }
         }
 
-        var statements = yield db.statements.find(criteria, {limit: specifiedLimit, fields : { _id: 0 }});
+        var statements = yield db.statements.find(criteria, { limit: specifiedLimit, skip: specifiedSkip, sort: { timestamp: -1 }, fields : { _id: 0 } });
         if (statements) {
             this.status = 200;
             this.body = { statements: statements };
