@@ -118,6 +118,10 @@ app.use(route.get('/xAPI/statements', function*() {
                   criteria['actor.mbox'] = actorMailToIRI;
                 }
             }
+
+            if (prop === 'parent') {
+                criteria['context.contextActivities.parent.id'] = query.parent;
+            }
         }
 
         var statements = yield db.statements.find(criteria, { limit: specifiedLimit, skip: specifiedSkip, sort: { timestamp: -1 }, fields : { _id: 0 } });
