@@ -19,11 +19,13 @@
     db.createCollection("statements");  
     ```
 
-3. Create index for courseId field:
-    
+3. Create indexes for most frequently used filter properties:
+
     ```
     use lrs
     db.statements.ensureIndex({ "context.extensions.http://easygenerator/expapi/course/id" : 1});  
+    db.statements.ensureIndex({ "verb.id" : 1});
+    db.statements.ensureIndex({ "context.registration" : 1});
     ```
 
 ### Installing website
@@ -60,7 +62,7 @@
     ```
 
 4. Create 'iisnode.yml' file in the root to override default node run options and to specify `--harmony` flag
-    
+
     `nodeProcessCommandLine: node.exe --harmony #full path can be used here as well`
 
 5. Copy folder to the server (without `.git` and `package.json`:))

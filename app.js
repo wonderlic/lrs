@@ -66,10 +66,34 @@ app.use(route.get('/xAPI/statements', function*() {
     else {
 
         var criteria = {};
+        var defaultLimit = 2000;
+        var specifiedLimit;
+        var defaultSkip = 0;
+        var specifiedSkip;
 
         for (var prop in query) {
+
+            if (prop === 'limit') {
+                specifiedLimit = parseInt(query.limit, 10);
+                if (isNaN(specifiedLimit) || specifiedLimit < 1) {
+                  specifiedLimit = defaultLimit;
+                }
+            }
+
+            if (prop === 'skip') {
+                specifiedSkip = parseInt(query.skip, 10);
+                if (isNaN(specifiedSkip) || specifiedLimit < 0) {
+                  specifiedSkip = defaultSkip;
+                }
+            }
+            
             if (prop === 'verb') {
-                criteria['verb.id'] = query.verb;
+                var verbs = query.verb.split(',')
+                if (verbs.length === 1) {
+                    criteria['verb.id'] = verbs[0];
+                } else if (verbs.length > 1) {
+                    criteria['verb.id'] = { $in: verbs };
+                }
             }
 
             if (prop === 'activity') {
@@ -83,9 +107,24 @@ app.use(route.get('/xAPI/statements', function*() {
             if (prop.indexOf('context.extensions.') === 0) {
                 criteria[prop] = query[prop];
             }
+
+            if (prop === 'agent') {
+                query.agent = JSON.parse(query.agent);
+                if (query.agent.objectType === 'Agent') {
+                  var actorMailToIRI = query.agent.mbox;
+                  if (actorMailToIRI.indexOf('mailto:') !== 0) {
+                    actorMailToIRI = 'mailto:' + actorMailToIRI;
+                  }
+                  criteria['actor.mbox'] = actorMailToIRI;
+                }
+            }
+
+            if (prop === 'parent') {
+                criteria['context.contextActivities.parent.id'] = query.parent;
+            }
         }
-        
-        var statements = yield db.statements.find(criteria, {limit: 500, fields : { _id: 0 }});
+
+        var statements = yield db.statements.find(criteria, { limit: specifiedLimit, skip: specifiedSkip, sort: { timestamp: -1 }, fields : { _id: 0 } });
         if (statements) {
             this.status = 200;
             this.body = { statements: statements };
