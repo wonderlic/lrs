@@ -23,7 +23,8 @@
 
     ```
     use lrs
-    db.statements.ensureIndex({ "context.extensions.http://easygenerator/expapi/course/id" : 1});  
+    db.statements.ensureIndex({ "context.extensions.http://easygenerator/expapi/course/id" : 1});
+    db.statements.ensureIndex({ "context.extensions.http://easygenerator/expapi/learningpath/id" : 1});
     db.statements.ensureIndex({ "verb.id" : 1});
     db.statements.ensureIndex({ "context.registration" : 1});
     ```
