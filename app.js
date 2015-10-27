@@ -101,7 +101,12 @@ app.use(route.get('/xAPI/statements', function*() {
             }
 
             if (prop === 'registration') {
-                criteria['context.registration'] = query.registration;
+				var registrations = query.registration.split(',');
+				if (registrations.length === 1) {
+                    criteria['context.registration'] = registrations[0];
+                } else if (registrations.length > 1) {
+                    criteria['context.registration'] = { $in: registrations };
+                }
             }
 
             if (prop.indexOf('context.extensions.') === 0) {
