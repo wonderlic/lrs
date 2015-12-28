@@ -8,9 +8,8 @@ var
     compress = require('koa-compress'),
     parse = require('co-body'),
 	_ = require('underscore'),
-    dbConfig = require("./db/db"),
     queryParser = require("./queryParser"),
-	db,
+	db = require("./db/db"),
 	
     VERSION = '1.0.2';
 
@@ -53,7 +52,7 @@ app.use(route.get('/xAPI/statements', function*() {
             this.status = 400;
         }
         else {
-            var statement = yield dbConfig.query(db.collection('statements'), 'findOne', {
+            var statement = yield db.statements.findOne({
                 id: query.statementId
             });
             if (statement) {
@@ -67,7 +66,7 @@ app.use(route.get('/xAPI/statements', function*() {
         var defaultSkip = 0;
         var options = queryParser.generateOptions(query, defaultLimit, defaultSkip);
        
-        var statements = yield dbConfig.query(db.collection('statements'), 'find', [options.criteria, { limit: options.specifiedLimit, skip: options.specifiedSkip, sort: { timestamp: -1 }, fields : { _id: 0 } }], true);
+        var statements = yield db.statements.find(options.criteria, { limit: options.specifiedLimit, skip: options.specifiedSkip, sort: { timestamp: -1 }, fields : { _id: 0 } });
         
         if (statements) {
             this.status = 200;
@@ -91,7 +90,7 @@ app.use(route.get('/xAPI/statements/grouped', function*() {
         answered: "http://adlnet.gov/expapi/verbs/answered"
     }
     
-    var statements = yield dbConfig.query(db.collection('statements'), 'aggregate', [[
+    var statements = yield db.statements.aggregate([
         {
             $match: { $and: [
                 options.objectId,
@@ -109,7 +108,7 @@ app.use(route.get('/xAPI/statements/grouped', function*() {
         { $skip: options.specifiedSkip || defaultSkip },
         { $limit: options.specifiedLimit || defaultLimit },
         { $project: { _id: 0, root: 1 } }
-    ]]);
+    ]);
     
     if(loadEmbededStatements){
         yield* (function* (results) {
@@ -118,7 +117,7 @@ app.use(route.get('/xAPI/statements/grouped', function*() {
                 if(!rootContext || !rootContext.registration){
                     continue;
                 }
-                var embededStatements = yield dbConfig.query(db.collection('statements'), 'aggregate', [[
+                var embededStatements = yield db.statements.aggregate([
                     {
                         $match: { $and: [
                             { "context.registration": rootContext.registration },
@@ -130,7 +129,7 @@ app.use(route.get('/xAPI/statements/grouped', function*() {
                             _id: "$verb.id", statements: { $push: "$$ROOT" }
                         }
                     }
-                ]]);
+                ]);
                 if(!embededStatements || !embededStatements.length){
                     continue;
                 }
@@ -168,11 +167,8 @@ app.use(route.get('/xAPI/statements/grouped', function*() {
 }));
 
 app.use(route.post('/xAPI/statements', function*(next) {
-    yield dbConfig.query(db.collection('statements'), 'insert', [yield parse(this)]);
+    yield db.statements.insert(yield parse(this));
     this.status = 200;
 }));
 
-dbConfig.connect().then(function(_db) {
-	db = _db;
-	app.listen(process.env.PORT, process.env.IP);
-});
+app.listen(process.env.PORT, process.env.IP);
