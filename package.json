@@ -11,7 +11,7 @@
     "koa-logger": "^1.2.2",
     "koa-route": "^2.2.0",
     "mongodb": "^1.4.19",
-    "q": "^1.4.1"
+    "underscore": "^1.8.3"
   },
   "devDependencies": {},
   "scripts": {
