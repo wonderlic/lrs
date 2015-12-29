@@ -3,7 +3,7 @@
 var
     monk = require('monk'),
     wrap = require('co-monk'),
-    url = 'mongodb://' + process.env.IP + '/nlrs',
+    url = 'mongodb://' + process.env.IP + '/lrs',
     db = monk(url),
     statements = wrap(db.get('statements'));
     
