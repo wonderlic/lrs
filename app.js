@@ -6,10 +6,10 @@ var
     route = require('koa-route'),
     cors = require('koa-cors'),
     compress = require('koa-compress'),
-    aboutRouteHandler = require('./routes/about'),
-    statementsRouteHandler = require('./routes/statements'),
-    resultsRouteHandler = require('./routes/results'),
-    insertRouteHandler = require('./routes/insert'),
+    aboutRouteHandler = require('./routeHandlers/about'),
+    statementsRouteHandler = require('./routeHandlers/statements'),
+    resultsRouteHandler = require('./routeHandlers/results'),
+    insertRouteHandler = require('./routeHandlers/insert'),
 	
     VERSION = '1.0.2';
 

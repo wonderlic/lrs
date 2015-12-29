@@ -2,7 +2,7 @@
 
 var 
     parse = require('co-body'),
-    db = require("../db/db");
+    db = require("../db");
 
 module.exports = function*(next) {
     yield db.statements.insert(yield parse(this));

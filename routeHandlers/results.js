@@ -3,7 +3,7 @@
 var 
 	_ = require('underscore'),
     queryParser = require("../queryParser"),
-	db = require("../db/db"),
+	db = require("../db"),
     constants = require("../constants");
 
 module.exports = function*() {
