@@ -68,13 +68,13 @@ module.exports = function*() {
                 results[i].embeded = _.map(_.sortBy(mastered.statements, function(item){ return -item.timestamp; }), function(statement){
                     return {
                         mastered: statement,
-                        answered: _.sortBy(_.filter(answered.statements, function(element) {
+                        answered: answered && answered.statements ? _.sortBy(_.filter(answered.statements, function(element) {
                             try {
                                 return _.some(element.context.contextActivities.parent, function(item){ return item.id === statement.object.id; });
                             } catch(e) {
                                 return false;
                             }
-                        }), function(item){ return -item.timestamp; })
+                        }), function(item){ return -item.timestamp; }) : null
                     };
                 });
             }
