@@ -4,8 +4,8 @@ var
     koa = require('koa'),
     logger = require('koa-logger'),
     route = require('koa-route'),
-    cors = require('koa-cors'),
     compress = require('koa-compress'),
+    cors = require('./middlewares/cors'),
     aboutRouteHandler = require('./routeHandlers/about'),
     statementsRouteHandler = require('./routeHandlers/statements'),
     resultsRouteHandler = require('./routeHandlers/results'),
@@ -16,10 +16,9 @@ var
 var app = koa();
 
 app.use(compress());
-app.use(cors({
-		headers: 'x-experience-api-version,accept,authorization,content-type,If-Match,If-None-Match'
-    }
-));
+
+app.use(cors);
+
 app.use(logger());
 
 app.use(route.get('/xAPI/about', aboutRouteHandler));
