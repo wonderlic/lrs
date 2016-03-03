@@ -42,7 +42,12 @@ module.exports = function*() {
                     {
                         $match: { $and: [
                             { "context.registration": rootContext.registration },
-                            { "verb.id": { $in: [constants.statementsVerbs.mastered, constants.statementsVerbs.answered] } }
+                            { "verb.id": 
+                                { $in: [
+                                    constants.statementsVerbs.mastered, 
+                                    constants.statementsVerbs.answered,
+                                    constants.statementsVerbs.experienced                                   
+                                ] } }
                         ]}
                     },
                     {
@@ -55,28 +60,37 @@ module.exports = function*() {
                     continue;
                 }
                 
-                var mastered = _.find(embededStatements, function(statement){
-                    return statement._id === constants.statementsVerbs.mastered;
-                }),
-                    answered = _.find(embededStatements, function(statement){
-                    return statement._id === constants.statementsVerbs.answered;
-                });
-                if(!mastered || !mastered.statements){
+                var masteredGroup =  findStatementGroupById(embededStatements, constants.statementsVerbs.mastered),
+                    answeredGroup = findStatementGroupById(embededStatements, constants.statementsVerbs.answered),
+                    experiencedGroup = findStatementGroupById(embededStatements, constants.statementsVerbs.experienced);
+
+                if(!masteredGroup || !masteredGroup.statements){
                     continue;
                 }
                 
-                results[i].embeded = _.map(_.sortBy(mastered.statements, function(item){ return -item.timestamp; }), function(statement){
+                results[i].embeded = _.map(_.sortBy(masteredGroup.statements, function(item){ return -item.timestamp; }), function(statement){
                     return {
                         mastered: statement,
-                        answered: answered && answered.statements ? _.sortBy(_.filter(answered.statements, function(element) {
+                        answered: mapChildStatements(answeredGroup, statement),
+                        experienced: mapChildStatements(experiencedGroup, statement)
+                    };
+                });
+                
+                function mapChildStatements(statementGroup, parentStatement){                   
+                    return statementGroup && statementGroup.statements ? _.sortBy(_.filter(statementGroup.statements, function(element) {
                             try {
-                                return _.some(element.context.contextActivities.parent, function(item){ return item.id === statement.object.id; });
+                                return _.some(element.context.contextActivities.parent, function(item){ return item.id === parentStatement.object.id; });
                             } catch(e) {
                                 return false;
                             }
-                        }), function(item){ return -item.timestamp; }) : null
-                    };
-                });
+                        }), function(item){ return -item.timestamp; }) : null;
+                }
+                
+                function findStatementGroupById(embededStatements, id){
+                    return _.find(embededStatements, function(statement){
+                        return statement._id === id;
+                    });
+                }
             }
         })(statements);
     }
