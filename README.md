@@ -12,11 +12,12 @@
 
 ### Configuring database
 1. Run Mongo DB as [win service](http://docs.mongodb.org/manual/tutorial/install-mongodb-on-windows/#run-the-mongodb-service)
-2. Create "statements" collection within "lrs" DB.
+2. Create "statements" and "results" collection within "lrs" DB.
 
     ```
     use lrs
-    db.createCollection("statements");  
+    db.createCollection("statements"); 
+    db.createCollection("results"); 
     ```
 
 3. Create indexes for most frequently used filter properties:
@@ -27,6 +28,10 @@
     db.statements.ensureIndex({ "context.extensions.http://easygenerator/expapi/learningpath/id" : 1});
     db.statements.ensureIndex({ "verb.id" : 1});
     db.statements.ensureIndex({ "context.registration" : 1});
+
+    db.results.ensureIndex({ "id" : 1 });
+    db.results.ensureIndex({ "attempt_id" : 1 });
+    db.results.ensureIndex({ "last_activity" : -1 });
     ```
 
 ### Installing website
@@ -68,6 +73,9 @@
 
 5. Copy folder to the server (without `.git` and `package.json`:))
 6. Create Web site in IIS and add corresponding site bindings and permissions
+7. To generate results into results collection from existing data in statements collection install "co" module via npm and run:
+
+    `node migration/exec.js`
 
 Resources
 -----------

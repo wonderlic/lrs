@@ -15,5 +15,6 @@ module.exports = {
     activityTypes: {
         course: "http://adlnet.gov/expapi/activities/course",
         objective: "http://adlnet.gov/expapi/activities/objective"
-    }
+    },
+    courseKey: 'http://easygenerator/expapi/course/id'
 };
