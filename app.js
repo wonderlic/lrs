@@ -43,4 +43,4 @@ app.use(route.get('/xAPI/results', resultsRouteHandler));
 
 app.use(route.post('/xAPI/statements', insertRouteHandler));
 
-app.listen(process.env.PORT, process.env.IP);
+app.listen(process.env.PORT || 3000, process.env.IP);
