@@ -29,9 +29,8 @@
     db.statements.ensureIndex({ "verb.id" : 1});
     db.statements.ensureIndex({ "context.registration" : 1});
 
-    db.results.ensureIndex({ "id" : 1 });
+    db.results.ensureIndex({ "id" : 1, "last_activity": -1 });
     db.results.ensureIndex({ "attempt_id" : 1 });
-    db.results.ensureIndex({ "last_activity" : -1 });
     ```
 
 ### Installing website
