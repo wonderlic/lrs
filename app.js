@@ -1,11 +1,13 @@
 'use strict';
 
 var
+    http = require('http'),
     koa = require('koa'),
     logger = require('koa-logger'),
     route = require('koa-route'),
     compress = require('koa-compress'),
     cors = require('./middlewares/cors'),
+    constants = require('./constants'),
     aboutRouteHandler = require('./routeHandlers/about'),
     statementsRouteHandler = require('./routeHandlers/statements'),
     resultsRouteHandler = require('./routeHandlers/results'),
@@ -43,4 +45,6 @@ app.use(route.get('/xAPI/results', resultsRouteHandler));
 
 app.use(route.post('/xAPI/statements', insertRouteHandler));
 
-app.listen(process.env.PORT || 3000, process.env.IP);
+var server = http.createServer(app.callback());
+server.setTimeout(constants.socketLifetime);
+server.listen(process.env.PORT || 3000, process.env.IP);
