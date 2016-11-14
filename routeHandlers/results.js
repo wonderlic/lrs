@@ -13,7 +13,7 @@ module.exports = function*() {
     var options = queryParser.generateOptions(query, constants.defaultLimit, constants.defaultSkip);
     
     var stream;
-    if(loadEmbededStatements) { 
+    if(loadEmbededStatements) {
         stream = yield* command.getFull(options.objectId[courseKey], options.specifiedSkip, options.specifiedLimit);
     } else {
         stream = yield* command.getRoot(options.objectId[courseKey], options.specifiedSkip, options.specifiedLimit);
@@ -21,7 +21,7 @@ module.exports = function*() {
 
     if (stream) {
         this.status = 200;
-        this.set({ "Content-Type": "application/json" });
+        this.type = 'application/json';
         this.body = stream;
     }
 }

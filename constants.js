@@ -1,6 +1,9 @@
 'use strict';
 
 module.exports = {
+    socketLifetime: 300000,
+    dbConnectionTimeout: 60000,
+    dbSocketTimeout: 300000,
     defaultLimit: 2000,
     defaultSkip: 0,
     statementsVerbs: {
