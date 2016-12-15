@@ -3,7 +3,7 @@
 
 ##Before deployment
 
-1. Install nodejs [v0.11.xx](http://nodejs.org/dist/)
+1. Install nodejs [v5.xx.xx](http://nodejs.org/dist/)
 2. Install iisnode for IIS 7.x/8.x: [x86](https://github.com/azure/iisnode/releases/download/v0.2.16/iisnode-full-v0.2.16-x86.msi) or [x64](https://github.com/azure/iisnode/releases/download/v0.2.16/iisnode-full-v0.2.16-x64.msi)
 3. Install [URL Rewrite](http://www.iis.net/download/URLRewrite) for IIS
 4. Install Mongo DB [2.6.7 (or latest)](http://www.mongodb.org/downloads)
