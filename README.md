@@ -16,8 +16,8 @@
 
     ```
     use lrs
-    db.createCollection("statements"); 
-    db.createCollection("results"); 
+    db.createCollection("statements");
+    db.createCollection("results");
     ```
 
 3. Create indexes for most frequently used filter properties:
@@ -75,6 +75,10 @@
 7. To generate results into results collection from existing data in statements collection install "co" module via npm and run:
 
     `node migration/exec.js`
+
+### Using a different server to host Mongodb
+If your mongodb instance is hosted under a non-default location, set the `DBHOST` and `DBNAME` environment variables, and the lrs will connect to `mongodb://${DBHOST}/${DBNAME}` instead.
+For example, in the IIS config, simply add `<app key="DBHOST" value="..." />` and `<app key="DBNAME" value="..." />` to the `<appSettings>` element.
 
 Resources
 -----------
