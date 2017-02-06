@@ -3,6 +3,7 @@
 var
     http = require('http'),
     koa = require('koa'),
+    auth = require('koa-basic-auth'),
     logger = require('koa-logger'),
     route = require('koa-route'),
     compress = require('koa-compress'),
@@ -22,6 +23,24 @@ app.use(compress());
 app.use(cors);
 
 app.use(logger());
+
+if (process.env.AUTH_USER && process.env.AUTH_PASSWORD) {
+    app.use(function *(next){
+        try {
+            yield next;
+        } catch (err) {
+            if (401 == err.status) {
+                this.status = 401;
+                this.set('WWW-Authenticate', 'Basic');
+                this.body = 'Unauthorized';
+            } else {
+                throw err;
+            }
+        }
+    });
+
+    app.use(auth({name: process.env.AUTH_USER, pass: process.env.AUTH_PASSWORD}));
+}
 
 app.use(route.get('/xAPI/about', aboutRouteHandler));
 

@@ -80,6 +80,9 @@
 If your mongodb instance is hosted under a non-default location, set the `DBHOST` and `DBNAME` environment variables, and the lrs will connect to `mongodb://${DBHOST}/${DBNAME}` instead.
 For example, in the IIS config, simply add `<app key="DBHOST" value="..." />` and `<app key="DBNAME" value="..." />` to the `<appSettings>` element.
 
+### Securing the LRS
+If you set the `AUTH_USER` and `AUTH_PASSWORD` environment variables, the LRS will prompt for and require basic authentication credentials for all xAPI requests.
+
 Resources
 -----------
 1. [Hosting node.js applications in IIS on Windows](https://github.com/tjanczuk/iisnode)
