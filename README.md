@@ -77,7 +77,8 @@
     `node migration/exec.js`
 
 ### Using a different server to host Mongodb
-If your mongodb instance is hosted under a non-default location, set the `DBHOST` and `DBNAME` environment variables, and the lrs will connect to `mongodb://${DBHOST}/${DBNAME}` instead.
+If your mongodb instance is hosted under a non-default location, set the `MONGO_URI` environment variable.
+Or, set the `DBHOST` and `DBNAME` environment variables, and the lrs will connect to `mongodb://${DBHOST}/${DBNAME}` instead.
 For example, in the IIS config, simply add `<app key="DBHOST" value="..." />` and `<app key="DBNAME" value="..." />` to the `<appSettings>` element.
 
 Resources
